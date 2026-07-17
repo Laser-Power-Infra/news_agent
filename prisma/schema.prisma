@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model categories {
+  id                        Int                         @id @default(autoincrement())
+  name                      String                      @unique @db.VarChar
+  search_keywords           Json
+  company_category_mappings company_category_mappings[]
+  news_category_mapping     news_category_mapping[]
+
+  @@index([id], map: "ix_categories_id")
+}
+
+model companies {
+  id                        Int                         @id @default(autoincrement())
+  name                      String                      @unique @db.VarChar
+  status                    String?                     @db.VarChar
+  industry_context          String
+  company_category_mappings company_category_mappings[]
+  scraped_news              scraped_news[]
+
+  @@index([id], map: "ix_companies_id")
+}
+
+model company_category_mappings {
+  id                Int        @id @default(autoincrement())
+  company_id        Int
+  category_id       Int
+  company_keywords  Json
+  industry_keywords Json
+  categories        categories @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  companies         companies  @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([id], map: "ix_company_category_mappings_id")
+}
+
+model scraped_news {
+  id                    Int                     @id @default(autoincrement())
+  company_id            Int
+  priority_score        Int?
+  source                String                  @db.VarChar
+  headline              String                  @db.VarChar
+  url                   String                  @unique @db.VarChar
+  description           String?
+  impact_prediction     String?                 @db.VarChar
+  impact_reasoning      String?
+  published_date        DateTime?               @db.Timestamp(6)
+  created_at            DateTime?               @db.Timestamp(6)
+  news_category_mapping news_category_mapping[]
+  companies             companies               @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([id], map: "ix_scraped_news_id")
+}
+
+model news_category_mapping {
+  news_id      Int
+  category_id  Int
+  categories   categories   @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  scraped_news scraped_news @relation(fields: [news_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([news_id, category_id])
+}

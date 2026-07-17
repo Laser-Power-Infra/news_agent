@@ -1,65 +1,189 @@
-import Image from "next/image";
+'use client'
+
+import { useState, useEffect, useMemo } from 'react'
+import Sidebar from '../components/Sidebar'
+import TopNav from '../components/TopNav'
+import FilterBar from '../components/FilterBar'
+import type { Filters } from '../components/FilterBar'
+import NewsFeedHeader from '../components/NewsFeedHeader'
+import NewsTable from '../components/NewsTable'
+import type { NewsItem } from '../components/NewsTable'
+import LoadingScreen from '../components/LoadingScreen'
+import Pagination from '../components/Pagination'
+
+const defaultFilters: Filters = {
+  company: null,
+  category: null,
+  status: null,
+  sentiment: null,
+  priority: null,
+  dateRange: null,
+}
 
 export default function Home() {
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [newsData, setNewsData] = useState<NewsItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filters, setFilters] = useState<Filters>(defaultFilters)
+
+  useEffect(() => {
+    async function fetchNews() {
+      try {
+        const res = await fetch('/api/news')
+        if (!res.ok) throw new Error('Failed to fetch')
+        const data = await res.json()
+        setNewsData(data)
+      } catch (err) {
+        console.error('Failed to load news:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchNews()
+  }, [])
+
+  const companies = useMemo(() => [...new Set(newsData.map((d) => d.company))], [newsData])
+  const categories = useMemo(
+    () => [...new Set(newsData.flatMap((d) => d.categories))],
+    [newsData]
+  )
+
+  const [currentPage, setCurrentPage] = useState(1)
+  const pageSize = 10
+
+  const filteredData = useMemo(() => {
+    let data = newsData
+
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase()
+      data = data.filter((item) =>
+        [item.headline, item.description, item.company, item.source, ...item.categories]
+          .join(' ')
+          .toLowerCase()
+          .includes(q)
+      )
+    }
+
+    if (filters.company) {
+      data = data.filter((item) => item.company === filters.company)
+    }
+
+    if (filters.category) {
+      data = data.filter((item) => item.categories.includes(filters.category!))
+    }
+
+    if (filters.sentiment) {
+      data = data.filter((item) => item.sentiment === filters.sentiment)
+    }
+
+    if (filters.priority) {
+      const ranges: Record<string, [number, number]> = {
+        high: [70, 100],
+        medium: [40, 69],
+        low: [0, 39],
+      }
+      const range = ranges[filters.priority]
+      if (range) {
+        const [min, max] = range
+        data = data.filter((item) => {
+          if (item.priorityScore === null) return false
+          return item.priorityScore >= min && item.priorityScore <= max
+        })
+      }
+    }
+
+    if (filters.dateRange && filters.dateRange !== 'all') {
+      const msMap: Record<string, number> = {
+        '24h': 24 * 60 * 60 * 1000,
+        '7d': 7 * 24 * 60 * 60 * 1000,
+        '30d': 30 * 24 * 60 * 60 * 1000,
+      }
+      const ms = msMap[filters.dateRange]
+      if (ms) {
+        const cutoff = Date.now() - ms
+        data = data.filter((item) => {
+          if (!item.publishedDate) return true
+          return new Date(item.publishedDate).getTime() >= cutoff
+        })
+      }
+    }
+
+    return data
+  }, [newsData, searchTerm, filters])
+
+  const paginatedData = useMemo(
+    () => filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [filteredData, currentPage, pageSize]
+  )
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filteredData])
+
+  function handleFilterChange(key: keyof Filters, value: string | null) {
+    setFilters((prev) => ({ ...prev, [key]: value }))
+  }
+
+  function handleClearAll() {
+    setFilters(defaultFilters)
+  }
+
+  async function handleRemoveCategory(newsId: string, categoryId: number) {
+    try {
+      const res = await fetch(`/api/news/${newsId}/categories/${categoryId}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) throw new Error('Failed to remove')
+      setNewsData((prev) =>
+        prev.map((item) => {
+          if (item.id !== newsId) return item
+          const idx = item.categoryIds.indexOf(categoryId)
+          if (idx === -1) return item
+          const newCategories = item.categories.filter((_, i) => i !== idx)
+          const newCategoryIds = item.categoryIds.filter((_, i) => i !== idx)
+          return {
+            ...item,
+            categories: newCategories,
+            categoryIds: newCategoryIds,
+            category: newCategories.length > 0 ? newCategories.join(', ').toUpperCase() : 'Not in DB',
+          }
+        })
+      )
+    } catch (err) {
+      console.error('Failed to remove category:', err)
+    }
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <>
+      {/* <Sidebar activeItem="News Feed" /> */}
+      <main className=" min-h-screen flex flex-col">
+        <TopNav searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+        <FilterBar
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onClearAll={handleClearAll}
+          companies={companies}
+          categories={categories}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+        <NewsFeedHeader />
+        {loading ? (
+          <LoadingScreen />
+        ) : (
+          <div className="px-xl pb-xl flex-1 flex flex-col">
+            <div className="bg-surface rounded-xl border border-outline-variant shadow-sm overflow-hidden flex flex-col flex-1">
+              <NewsTable
+                items={paginatedData}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                onRemoveCategory={handleRemoveCategory}
+              />
+              <Pagination total={filteredData.length} currentPage={currentPage} onPageChange={setCurrentPage} />
+            </div>
+          </div>
+        )}
       </main>
-    </div>
-  );
+    </>
+  )
 }
