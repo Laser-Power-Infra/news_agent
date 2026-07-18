@@ -4,7 +4,6 @@ import prisma from '@/lib/prisma'
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const search = searchParams.get('search') || ''
-  console.log('Fetching news with search:', search)
 
   const where = search
     ? {
@@ -30,7 +29,11 @@ export async function GET(request: NextRequest) {
       },
       orderBy: { published_date: 'desc' },
     })
-    console.log('Fetched news items from DB:', news.length)
+
+    const lastScraped = await prisma.scraped_news.aggregate({
+      _max: { created_at: true },
+    })
+
     const mapped = news.map((item) => {
       const categoryNames = item.news_category_mapping.map((m) => m.categories.name)
       return {
@@ -38,7 +41,7 @@ export async function GET(request: NextRequest) {
         headline: item.headline,
         description: item.description ?? 'No description ',
         url: item.url,
-        company: item.companies?.name ?? '`Not in DB`',
+        company: item.companies?.name ?? 'Not in DB',
         category: categoryNames.join(', ').toUpperCase() || 'No Category',
         categories: categoryNames,
         categoryIds: item.news_category_mapping.map((m) => m.category_id),
@@ -52,15 +55,18 @@ export async function GET(request: NextRequest) {
         publishedDate: item.published_date?.toISOString() ?? null,
       }
     })
-    console.log('Fetched news items:', mapped.length)
-    return NextResponse.json(mapped)
+
+    return NextResponse.json({
+      items: mapped,
+      lastScraped: lastScraped._max.created_at?.toISOString() ?? null,
+    })
   } catch (error) {
     console.error('Failed to fetch news:', error)
     return NextResponse.json({ error: 'Failed to fetch news' }, { status: 500 })
   }
 }
 
-function formatRelativeTime(date: Date): string {
+export function formatRelativeTime(date: Date): string {
   const now = new Date()
   const diffMs = now.getTime() - date.getTime()
   const diffMins = Math.floor(diffMs / 60000)

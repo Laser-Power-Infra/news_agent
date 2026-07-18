@@ -26,14 +26,17 @@ export default function Home() {
   const [newsData, setNewsData] = useState<NewsItem[]>([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState<Filters>(defaultFilters)
+  const [lastScraped, setLastScraped] = useState<string | null>(null)
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc')
 
   useEffect(() => {
     async function fetchNews() {
       try {
         const res = await fetch('/api/news')
         if (!res.ok) throw new Error('Failed to fetch')
-        const data = await res.json()
-        setNewsData(data)
+        const json = await res.json()
+        setNewsData(json.items)
+        setLastScraped(json.lastScraped)
       } catch (err) {
         console.error('Failed to load news:', err)
       } finally {
@@ -109,8 +112,14 @@ export default function Home() {
       }
     }
 
+    data = [...data].sort((a, b) => {
+      const da = a.publishedDate ? new Date(a.publishedDate).getTime() : 0
+      const db = b.publishedDate ? new Date(b.publishedDate).getTime() : 0
+      return sortOrder === 'desc' ? db - da : da - db
+    })
+
     return data
-  }, [newsData, searchTerm, filters])
+  }, [newsData, searchTerm, filters, sortOrder])
 
   const paginatedData = useMemo(
     () => filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize),
@@ -157,9 +166,8 @@ export default function Home() {
 
   return (
     <>
-      {/* <Sidebar activeItem="News Feed" /> */}
-      <main className=" min-h-screen flex flex-col">
-        <TopNav searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+      <main className="min-h-screen flex flex-col">
+        <TopNav searchTerm={searchTerm} onSearchChange={setSearchTerm} lastScraped={lastScraped} />
         <FilterBar
           filters={filters}
           onFilterChange={handleFilterChange}
@@ -178,6 +186,8 @@ export default function Home() {
                 selectedId={selectedId}
                 onSelect={setSelectedId}
                 onRemoveCategory={handleRemoveCategory}
+                sortOrder={sortOrder}
+                onSortChange={() => setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
               />
               <Pagination total={filteredData.length} currentPage={currentPage} onPageChange={setCurrentPage} />
             </div>

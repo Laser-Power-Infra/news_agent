@@ -25,6 +25,8 @@ interface NewsTableProps {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onRemoveCategory?: (newsId: string, categoryId: number) => void;
+  sortOrder: "desc" | "asc";
+  onSortChange: () => void;
 }
 
 export default function NewsTable({
@@ -32,6 +34,8 @@ export default function NewsTable({
   selectedId,
   onSelect,
   onRemoveCategory,
+  sortOrder,
+  onSortChange,
 }: NewsTableProps) {
   const [previewDesc, setPreviewDesc] = useState<string | null>(null);
 
@@ -45,7 +49,17 @@ export default function NewsTable({
               <th className="px-md py-4 w-[12%] font-bold">Company</th>
               <th className="px-md py-4 w-[7%] font-bold">Priority</th>
               <th className="px-md py-4 w-[12%] font-bold">Category</th>
-              <th className="px-md py-4 w-[10%] font-bold">Published</th>
+              <th
+                className="px-md py-4 w-[10%] font-bold cursor-pointer select-none hover:text-primary transition-colors"
+                onClick={onSortChange}
+              >
+                <span className="flex items-center gap-1">
+                  Published
+                  <span className="material-symbols-outlined text-[14px]">
+                    {sortOrder === "desc" ? "expand_more" : "expand_less"}
+                  </span>
+                </span>
+              </th>
               <th className="px-md py-4 w-[10%] font-bold">Source</th>
               <th className="px-md py-4 w-[8%] font-bold">Sentiment</th>
             </tr>
