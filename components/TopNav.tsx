@@ -28,7 +28,7 @@ export default function TopNav({ searchTerm, onSearchChange, lastScraped }: TopN
       <div className="flex items-center gap-md">
         <div className="h-6 w-px bg-outline-variant mx-2" />
         <div className="px-md py-1.5 rounded-md bg-primary-container text-on-primary-container font-label-md font-bold text-[10px] whitespace-nowrap">
-          Last scraped: {lastScraped ? formatRelativeTime(lastScraped) : 'Loading...'}
+          Last Updated: {lastScraped ? formatRelativeTime(lastScraped) : 'Loading...'}
         </div>
       </div>
     </header>
