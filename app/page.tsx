@@ -126,9 +126,14 @@ export default function Home() {
     [filteredData, currentPage, pageSize]
   )
 
+  const filterKey = useMemo(
+    () => JSON.stringify({ searchTerm, filters }),
+    [searchTerm, filters]
+  )
+
   useEffect(() => {
     setCurrentPage(1)
-  }, [filteredData])
+  }, [filterKey])
 
   function handleFilterChange(key: keyof Filters, value: string | null) {
     setFilters((prev) => ({ ...prev, [key]: value }))
