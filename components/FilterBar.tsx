@@ -50,14 +50,14 @@ export default function FilterBar({ filters, onFilterChange, onClearAll, compani
       label: 'Category',
       options: categories.map((c) => ({ label: c, value: c })),
     },
-    {
-      key: 'status',
-      label: 'Status',
-      options: [
-        { label: 'Active', value: 'ACTIVE' },
-        { label: 'Inactive', value: 'INACTIVE' },
-      ],
-    },
+    // {
+    //   key: 'status',
+    //   label: 'Status',
+    //   options: [
+    //     { label: 'Active', value: 'ACTIVE' },
+    //     { label: 'Inactive', value: 'INACTIVE' },
+    //   ],
+    // },
     {
       key: 'sentiment',
       label: 'Sentiment',
