@@ -18,6 +18,21 @@ function formatRelativeTime(dateStr: string): string {
   const diffDays = Math.floor(diffHours / 24)
   return `${diffDays}d ago`
 }
+function formatSyncTime(dateStr: string | null): string {
+  if (!dateStr) return "Never";
+  try {
+    const d = new Date(dateStr);
+   return d.toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  } catch {
+    return "Unknown";
+  }
+}
 
 export default function TopNav({ searchTerm, onSearchChange, lastScraped }: TopNavProps) {
   return (
@@ -28,7 +43,7 @@ export default function TopNav({ searchTerm, onSearchChange, lastScraped }: TopN
       <div className="flex items-center gap-md">
         <div className="h-6 w-px bg-outline-variant mx-2" />
         <div className="px-md py-1.5 rounded-md bg-primary-container text-on-primary-container font-label-md font-bold text-[10px] whitespace-nowrap">
-          Last Updated: {lastScraped ? formatRelativeTime(lastScraped) : 'Loading...'}
+          Last Updated: {lastScraped ? formatSyncTime(lastScraped) : 'Loading...'}
         </div>
       </div>
     </header>
