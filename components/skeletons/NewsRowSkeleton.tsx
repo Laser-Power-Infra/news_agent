@@ -26,9 +26,6 @@ export default function NewsRowSkeleton() {
       <td className="px-md py-3 align-top">
         <Skeleton className="h-4 w-3/4" />
       </td>
-      <td className="px-md py-3 align-top">
-        <Skeleton className="h-6 w-16 rounded-md" />
-      </td>
     </tr>
   )
 }

@@ -1,7 +1,5 @@
 'use client'
 
-import SentimentBadge from './SentimentBadge'
-
 interface NewsRowProps {
   headline: string
   description: string
@@ -12,7 +10,6 @@ interface NewsRowProps {
   categoryIds: number[]
   publishedAt: string
   source: string
-  sentiment: 'positive' | 'neutral' | 'negative' | null
   priorityScore: number | null
   id: string
   isSelected: boolean
@@ -31,7 +28,6 @@ export default function NewsRow({
   categoryIds,
   publishedAt,
   source,
-  sentiment,
   priorityScore,
   id,
   isSelected,
@@ -77,7 +73,6 @@ export default function NewsRow({
           </div>
         ) : (
           <div className="mt-1">
-            <div className="text-[11px] text-on-surface-variant">No description</div>
             <a
               href={url}
               target="_blank"
@@ -135,9 +130,6 @@ export default function NewsRow({
       </td>
       <td className="px-md py-3 text-body-sm text-on-surface-variant align-top">{publishedAt}</td>
       <td className="px-md py-3 text-body-sm font-mono-md align-top">{source}</td>
-      <td className="px-md py-3 align-top">
-        <SentimentBadge sentiment={sentiment} />
-      </td>
     </tr>
   )
 }

@@ -6,7 +6,6 @@ export interface Filters {
   company: string | null
   category: string | null
   status: string | null
-  sentiment: string | null
   priority: string | null
   dateRange: string | null
 }
@@ -58,15 +57,6 @@ export default function FilterBar({ filters, onFilterChange, onClearAll, compani
     //     { label: 'Inactive', value: 'INACTIVE' },
     //   ],
     // },
-    {
-      key: 'sentiment',
-      label: 'Sentiment',
-      options: [
-        { label: 'Positive', value: 'positive' },
-        { label: 'Neutral', value: 'neutral' },
-        { label: 'Negative', value: 'negative' },
-      ],
-    },
     {
       key: 'priority',
       label: 'Priority',

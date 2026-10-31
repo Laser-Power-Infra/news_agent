@@ -8,13 +8,12 @@ export default function NewsTableSkeleton() {
         <table className="w-full text-left border-collapse table-fixed">
           <thead className="bg-surface-container border-b border-outline-variant">
             <tr>
-              <th className="px-md py-4 w-[36%]"><Skeleton className="h-3 w-20" /></th>
-              <th className="px-md py-4 w-[12%]"><Skeleton className="h-3 w-16" /></th>
-              <th className="px-md py-4 w-[7%]"><Skeleton className="h-3 w-14" /></th>
-              <th className="px-md py-4 w-[12%]"><Skeleton className="h-3 w-18" /></th>
-              <th className="px-md py-4 w-[10%]"><Skeleton className="h-3 w-14" /></th>
-              <th className="px-md py-4 w-[10%]"><Skeleton className="h-3 w-12" /></th>
-              <th className="px-md py-4 w-[8%]"><Skeleton className="h-3 w-16" /></th>
+              <th className="px-md py-4 w-[40%]"><Skeleton className="h-3 w-20" /></th>
+              <th className="px-md py-4 w-[13%]"><Skeleton className="h-3 w-16" /></th>
+              <th className="px-md py-4 w-[8%]"><Skeleton className="h-3 w-14" /></th>
+              <th className="px-md py-4 w-[13%]"><Skeleton className="h-3 w-18" /></th>
+              <th className="px-md py-4 w-[12%]"><Skeleton className="h-3 w-14" /></th>
+              <th className="px-md py-4 w-[14%]"><Skeleton className="h-3 w-12" /></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/30">

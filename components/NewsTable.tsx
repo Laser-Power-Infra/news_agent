@@ -15,7 +15,6 @@ export interface NewsItem {
   publishedAt: string;
   publishedDate: string | null;
   source: string;
-  sentiment: "positive" | "neutral" | "negative" | null;
   priorityScore: number | null;
   score: number | null;
 }
@@ -45,12 +44,12 @@ export default function NewsTable({
         <table className="w-full text-left border-collapse table-fixed">
           <thead className="bg-surface-container text-on-surface-variant font-label-md uppercase tracking-wider sticky top-0 z-10 border-b border-outline-variant">
             <tr>
-              <th className="px-md py-4 w-[36%] font-bold">Headline</th>
-              <th className="px-md py-4 w-[12%] font-bold">Company</th>
-              <th className="px-md py-4 w-[7%] font-bold">Priority</th>
-              <th className="px-md py-4 w-[12%] font-bold">Category</th>
+              <th className="px-md py-4 w-[40%] font-bold">Headline</th>
+              <th className="px-md py-4 w-[13%] font-bold">Company</th>
+              <th className="px-md py-4 w-[8%] font-bold">Priority</th>
+              <th className="px-md py-4 w-[13%] font-bold">Category</th>
               <th
-                className="px-md py-4 w-[10%] font-bold cursor-pointer select-none hover:text-primary transition-colors"
+                className="px-md py-4 w-[12%] font-bold cursor-pointer select-none hover:text-primary transition-colors"
                 onClick={onSortChange}
               >
                 <span className="flex items-center gap-1">
@@ -60,8 +59,7 @@ export default function NewsTable({
                   </span>
                 </span>
               </th>
-              <th className="px-md py-4 w-[10%] font-bold">Source</th>
-              <th className="px-md py-4 w-[8%] font-bold">Sentiment</th>
+              <th className="px-md py-4 w-[14%] font-bold">Source</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/30">

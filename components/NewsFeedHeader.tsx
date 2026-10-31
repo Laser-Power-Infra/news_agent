@@ -5,7 +5,7 @@ export default function NewsFeedHeader() {
         <div>
           <h2 className="font-display-lg text-display-lg text-on-surface">News Feed</h2>
           <p className="text-body-lg text-on-surface-variant mt-sm">
-            Real-time enterprise news monitoring and sentiment analysis.
+            Real-time enterprise news monitoring for Laser Group companies.
           </p>
         </div>
         <div className="flex gap-sm">

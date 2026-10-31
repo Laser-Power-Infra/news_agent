@@ -15,7 +15,6 @@ const defaultFilters: Filters = {
   company: null,
   category: null,
   status: null,
-  sentiment: null,
   priority: null,
   dateRange: null,
 }
@@ -74,10 +73,6 @@ export default function Home() {
 
     if (filters.category) {
       data = data.filter((item) => item.categories.includes(filters.category!))
-    }
-
-    if (filters.sentiment) {
-      data = data.filter((item) => item.sentiment === filters.sentiment)
     }
 
     if (filters.priority) {

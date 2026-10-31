@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
         },
       },
       orderBy: { published_date: 'desc' },
+      take: 1000,
     })
 
     const lastScraped = await prisma.scraped_news.aggregate({
@@ -56,10 +57,13 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({
-      items: mapped,
-      lastScraped: lastScraped._max.created_at?.toISOString() ?? null,
-    })
+    return NextResponse.json(
+      {
+        items: mapped,
+        lastScraped: lastScraped._max.created_at?.toISOString() ?? null,
+      },
+      { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } }
+    )
   } catch (error) {
     console.error('Failed to fetch news:', error)
     return NextResponse.json({ error: 'Failed to fetch news' }, { status: 500 })
